@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Rokking Dead</title>
+    
+       
+    <script  src="libs/gamesparks.js"></script>
+    <script  src="libs/gamesparks-functions.js"></script>
+    <script  src="libs/hmac-sha256.js"></script>
+    <script  src="https://apis.google.com/js/client:platform.js?onload=clientLoaded" async defer></script>
+  
+    </head>
+  <body>
+
+    <script type="text/javascript">
+   
+   
+   
+    
+       var GSapi = 'P304793lXWex';
+       var googleUser;
+       var accessCode;
+       var accessToken;
+       var gamesparks;
+       var gsToken;
+      
+      (function (global) {
+        
+       
+        global.clientLoaded = function () {
+          var authorizeProcessRunning = false;
+          global.gapi.load('auth2', function () {
+            var auth2 = gapi.auth2.init({
+              client_id: '64946269800-7lsnua2j0k4cjkvnf63vb8ndg1m2elnc.apps.googleusercontent.com',
+              scope: 'https://www.googleapis.com/auth/userinfo.profile'
+            });
+            
+            auth2.isSignedIn.listen(function (signedIn) {
+
+              accessToken =  gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token;
+              console.log("Access token " + accessToken)
+              
+            });
+            
+            auth2.then(function () {
+               global.document.getElementById("enable_offline_access").onclick = function () {
+                // request one-time code
+                authorizeProcessRunning = true;
+                
+               
+                  gapi.auth2.getAuthInstance().grantOfflineAccess({
+                    redirect_uri: 'postmessage'
+                  }).then(function (auth_response) {
+                   
+                  googleUser =   gapi.auth2.getAuthInstance().currentUser.get();
+                  accessToken = googleUser.getAuthResponse().id_token
+                  accessCode = auth_response.code;
+                  
+                 
+                  console.log("Code: " + accessCode);
+                  createGame();
+
+                });
+              };
+            });
+          });
+        };
+      }(this));
+      
+     
+      
+      function createGame() {
+     	//Create a gamesparks object to be used
+	    
+	     gamesparks = new GameSparks();
+      
+       init(gamesparks);
+       
+   
+      }
+    	//Initialse the SDK
+    	function init(gamesparks){
+    		gamesparks.initPreview({
+    			key: GSapi, 
+    			onNonce: onNonce,
+    			onInit:onInit,
+    			onMessage:onMessage,
+    		});
+    		
+    	}
+      
+      //Callback function to hmac sha256 a nonce with the secret. It's assumed you will have your own method of securing the secret;
+       function onNonce(nonce){
+        
+        var token;
+        console.log("Nonce: " + nonce);
+        
+        var xhttp = new XMLHttpRequest();
+        var url = "http://api.dead2me.ca/API?nonce=" + nonce;
+        console.log("Nonce URL:" + url)
+        xhttp.onreadystatechange = function(){
+          if (xhttp.readyState == 4 && xhttp.status == 200){            
+            console.log('Token:' + xhttp.responseText);
+            console.log('HTTP request finished');
+            token = xhttp.responseText;
+            
+          }
+          else
+          {
+            console.log('XMLHttp Request - Ready State: ' + xhttp.readyState + ' Status:' + xhttp.status );
+          }
+          
+        };
+        
+        xhttp.open("GET",url, false);
+        xhttp.send();
+        
+        console.log('Sending token to nonceCallback:' + token);
+        //return CryptoJS.enc.Base64.stringify(token);
+        return(token);
+    }
+      
+    
+       //Callback to handle async messages from the gamesparks platform
+     function onMessage(message){
+        console.log(JSON.stringify(message));
+     }
+       
+       
+     function loginResponse(response){
+        console.log(JSON.stringify(response));
+    }   
+      
+      function onInit(){
+        console.log("Initialized");
+        gamesparks.googleConnectRequest(accessToken, accessCode, loginResponse);
+     }
+      
+    </script>
+  
+    
+    <button id="enable_offline_access">Enable Offline Access</button>
+
+    
+  </body>
+</html>

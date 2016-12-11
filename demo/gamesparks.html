@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Insert title here</title>
+<script type="text/javascript" src="gamesparks.js"></script>
+<script type="text/javascript" src="gamesparks-functions.js"></script>
+<script type="text/javascript" src="hmac-sha256.js"></script>
+
+</head>
+<body>
+	apiKey<input id="apiKey"/>
+	apiSecret<input id="apiSecret"/>
+	<button onClick="init();">Initalise</button>
+	<button onClick='gamesparks.registrationRequest("testuser", "testuser", "testuser", registerResponse)'>Register</button>
+	<button onClick='gamesparks.authenticationRequest("testuser", "testuser", loginResponse)'>Login</button>
+	<button onClick='gamesparks.accountDetailsRequest(accountDetailsResponse)'>Account Details</button>
+	<button onClick='customEvent()'>Custom Event</button>
+	<div id="messages"></div>
+</body>
+<script type="text/javascript">
+	
+	//Create a gamesparks object to be used
+	var gamesparks = new GameSparks();
+	
+	//Initialse the SDK
+	function init(){
+		gamesparks.initPreview({
+			key:document.getElementById ('apiKey').value, 
+			onNonce: onNonce,
+			onInit:onInit,
+			onMessage:onMessage,
+		});
+	}
+
+	//Callback function to hmac sha256 a nonce with the secret. It's assumed you will have your own method of securing the secret;
+	function onNonce(nonce){
+		return CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(nonce, document.getElementById ('apiSecret').value));
+	}
+	
+	//Callback to handle when the SDK is initialised and ready to go
+	function onInit(){
+		console.log("Initialised");
+	}
+	
+	//Callback to handle async messages from the gamesparks platform
+	function onMessage(message){
+		console.log("onMessage");
+	}
+	
+	//Response handler examples
+	function registerResponse(response){
+		console.log(JSON.stringify(response));
+	}
+	
+	function loginResponse(response){
+		console.log(JSON.stringify(response));
+	}
+	
+	function accountDetailsResponse(response){
+		console.log(JSON.stringify(response));
+	}
+
+	function customEvent(){
+
+		gamesparks.sendWithData(
+			"LogEventRequest", 
+	    	{
+	        	eventKey : "FIRST_EVENT",
+	        	NUMBER_ATTR : 123,
+	        	STRING_ATTR : "this is a string",
+	        	JSON_ATTR : {key1 : 12, key2 : "abc"}
+	    	}, 
+	    	function(response){console.log(JSON.stringify(response));}
+		);
+
+	}
+	
+	
+</script>
+</html>
