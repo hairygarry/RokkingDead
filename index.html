@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <title>Rokking Dead</title>
     
-       
     <script  src="libs/gamesparks.js"></script>
     <script  src="libs/gamesparks-functions.js"></script>
     <script  src="libs/hmac-sha256.js"></script>
     <script  src="https://apis.google.com/js/client:platform.js?onload=clientLoaded" async defer></script>
+    <script  src="libs/phaser.min.js"></script>
+    <script  src="libs/rokkingdead.js"></script>  
+    <script  src="libs/game.js"></script>  
+  
+  
   
     </head>
   <body>
@@ -137,10 +141,12 @@
         gamesparks.googleConnectRequest(accessToken, accessCode, loginResponse);
      }
       
+      
+    //<button id="enable_offline_access">Enable Offline Access</button>
     </script>
   
     
-    <button id="enable_offline_access">Enable Offline Access</button>
+    
 
     
   </body>
